@@ -265,7 +265,7 @@
 	"variable": [
 		{
 			"key": "token",
-			"value": "ENTER YOUR GITHUB TOKEN"
+			"value": ""
 		},
 		{
 			"key": "repositoryName",
@@ -273,7 +273,7 @@
 		},
 		{
 			"key": "owner",
-			"value": "ENTER YOUR GITHUB USERNAME"
+			"value": "hutfljo84"
 		},
 		{
 			"key": "issueBody",
