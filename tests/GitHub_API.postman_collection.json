@@ -1,287 +1,251 @@
 {
-	"info": {
-		"_postman_id": "c3d4955c-a70f-44eb-9916-6cd4fabb2ac3",
-		"name": "GitHub_API",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "23149719"
-	},
-	"item": [
-		{
-			"name": "Create repository",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"const random = Math.random().toString(36).substring(2);",
-							"const repositoryName = \"My repository \" + random;",
-							"pm.collectionVariables.set(\"repositoryName\", repositoryName);"
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 201\", function () {",
-							"    pm.response.to.have.status(201);",
-							"});",
-							"",
-							"var jsonData = pm.response.json();",
-							"pm.collectionVariables.set(\"newRepositoryName\", jsonData.name);",
-							"",
-							"pm.test(\"Repository name created\", function () {",
-							"    pm.expect(jsonData.name).to.eql(pm.collectionVariables.get(\"repositoryName\").replaceAll(\" \", \"-\"));",
-							"});",
-							"",
-							"pm.test(\"Description created\", function () {",
-							"    pm.expect(jsonData.description).to.eql(\"Lorem ipsum dolor sit amet.\");",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"name\": \"{{repositoryName}}\",\n    \"description\": \"Lorem ipsum dolor sit amet.\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "https://api.github.com/user/repos",
-					"protocol": "https",
-					"host": [
-						"api",
-						"github",
-						"com"
-					],
-					"path": [
-						"user",
-						"repos"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create issue",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"const issueBody = pm.variables.replaceIn(\"{{$randomBs}}\");",
-							"pm.collectionVariables.set(\"issueBody\", issueBody);"
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"var jsonData = pm.response.json();",
-							"",
-							"pm.test(\"Test body\", function () {",
-							"    pm.expect(jsonData.body).to.eql(pm.collectionVariables.get(\"issueBody\"));",
-							"});",
-							"",
-							"pm.test(\"Check labels\", function () {",
-							"    pm.expect(jsonData[\"labels\"][0].name).to.eql(\"bug\");",
-							"});",
-							"",
-							"console.log(jsonData.labels[0].name);"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"title\": \"New issue\",\n    \"body\": \"{{issueBody}}\",\n    \"labels\": [\"bug\", \"urgent\"]\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "https://api.github.com/repos/:owner/:repo/issues",
-					"protocol": "https",
-					"host": [
-						"api",
-						"github",
-						"com"
-					],
-					"path": [
-						"repos",
-						":owner",
-						":repo",
-						"issues"
-					],
-					"variable": [
-						{
-							"key": "owner",
-							"value": "{{owner}}"
-						},
-						{
-							"key": "repo",
-							"value": "{{newRepositoryName}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Delete repository",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"url": {
-					"raw": "https://api.github.com/repos/:owner/:repo",
-					"protocol": "https",
-					"host": [
-						"api",
-						"github",
-						"com"
-					],
-					"path": [
-						"repos",
-						":owner",
-						":repo"
-					],
-					"variable": [
-						{
-							"key": "owner",
-							"value": "{{owner}}"
-						},
-						{
-							"key": "repo",
-							"value": "{{newRepositoryName}}"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get repository",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 404\", function () {",
-							"    pm.response.to.have.status(404);",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "https://api.github.com/repos/:owner/:repo",
-					"protocol": "https",
-					"host": [
-						"api",
-						"github",
-						"com"
-					],
-					"path": [
-						"repos",
-						":owner",
-						":repo"
-					],
-					"variable": [
-						{
-							"key": "owner",
-							"value": "{{owner}}"
-						},
-						{
-							"key": "repo",
-							"value": "{{newRepositoryName}}"
-						}
-					]
-				}
-			},
-			"response": []
-		}
-	],
-	"auth": {
-		"type": "bearer",
-		"bearer": [
-			{
-				"key": "token",
-				"value": "{{token}}",
-				"type": "string"
-			}
-		]
-	},
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		}
-	],
-	"variable": [
-		{
-			"key": "token",
-			"value": "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"
-		},
-		{
-			"key": "repositoryName",
-			"value": ""
-		},
-		{
-			"key": "owner",
-			"value": "hutfljo84"
-		},
-		{
-			"key": "issueBody",
-			"value": ""
-		},
-		{
-			"key": "newRepositoryName",
-			"value": null
-		}
-	]
+  "info": {
+    "_postman_id": "c3d4955c-a70f-44eb-9916-6cd4fabb2ac3",
+    "name": "GitHub_API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "23149719"
+  },
+  "item": [
+    {
+      "name": "Create repository",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const random = Math.random().toString(36).substring(2);",
+              "const repositoryName = \"My repository \" + random;",
+              "pm.collectionVariables.set(\"repositoryName\", repositoryName);"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "var jsonData = pm.response.json();",
+              "pm.collectionVariables.set(\"newRepositoryName\", jsonData.name);",
+              "",
+              "pm.test(\"Repository name created\", function () {",
+              "    pm.expect(jsonData.name).to.eql(pm.collectionVariables.get(\"repositoryName\").replaceAll(\" \", \"-\"));",
+              "});",
+              "",
+              "pm.test(\"Description created\", function () {",
+              "    pm.expect(jsonData.description).to.eql(\"Lorem ipsum dolor sit amet.\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"{{repositoryName}}\",\n    \"description\": \"Lorem ipsum dolor sit amet.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://api.github.com/user/repos",
+          "protocol": "https",
+          "host": ["api", "github", "com"],
+          "path": ["user", "repos"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create issue",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const issueBody = pm.variables.replaceIn(\"{{$randomBs}}\");",
+              "pm.collectionVariables.set(\"issueBody\", issueBody);"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "",
+              "pm.test(\"Test body\", function () {",
+              "    pm.expect(jsonData.body).to.eql(pm.collectionVariables.get(\"issueBody\"));",
+              "});",
+              "",
+              "pm.test(\"Check labels\", function () {",
+              "    pm.expect(jsonData[\"labels\"][0].name).to.eql(\"bug\");",
+              "});",
+              "",
+              "console.log(jsonData.labels[0].name);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"title\": \"New issue\",\n    \"body\": \"{{issueBody}}\",\n    \"labels\": [\"bug\", \"urgent\"]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://api.github.com/repos/:owner/:repo/issues",
+          "protocol": "https",
+          "host": ["api", "github", "com"],
+          "path": ["repos", ":owner", ":repo", "issues"],
+          "variable": [
+            {
+              "key": "owner",
+              "value": "{{owner}}"
+            },
+            {
+              "key": "repo",
+              "value": "{{newRepositoryName}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete repository",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "https://api.github.com/repos/:owner/:repo",
+          "protocol": "https",
+          "host": ["api", "github", "com"],
+          "path": ["repos", ":owner", ":repo"],
+          "variable": [
+            {
+              "key": "owner",
+              "value": "{{owner}}"
+            },
+            {
+              "key": "repo",
+              "value": "{{newRepositoryName}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get repository",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 404\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://api.github.com/repos/:owner/:repo",
+          "protocol": "https",
+          "host": ["api", "github", "com"],
+          "path": ["repos", ":owner", ":repo"],
+          "variable": [
+            {
+              "key": "owner",
+              "value": "{{owner}}"
+            },
+            {
+              "key": "repo",
+              "value": "{{newRepositoryName}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "token",
+      "value": "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"
+    },
+    {
+      "key": "repositoryName",
+      "value": ""
+    },
+    {
+      "key": "owner",
+      "value": "hutfljo84"
+    },
+    {
+      "key": "issueBody",
+      "value": ""
+    },
+    {
+      "key": "newRepositoryName",
+      "value": null
+    }
+  ]
 }
